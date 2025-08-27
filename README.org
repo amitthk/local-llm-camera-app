@@ -1,4 +1,4 @@
-#+TITLE: Camera VLM App - Real-time Vision AI
+#+TITLE: Local VLM Camera App - Real-time Vision AI using Local LLMs
 #+AUTHOR: Amit Thakur
 #+DATE: 2025-08-27
 
