@@ -1,58 +1,42 @@
-#+TITLE: Camera VLM Ollama (Vite + React)
+#+TITLE: Camera VLM App - Real-time Vision AI
 #+AUTHOR: Amit Thakur
 #+DATE: 2025-08-27
 
-* Overview
+* What is this?
 
-A lightweight React application that captures webcam frames and sends them to local vision models using OpenAI-compatible =/v1/chat/completions= endpoint. Preferably use efficient small models like SmolVLM via VLLM by compiling the docker image. Or directly use Ollama models.
+This is a simple React component which does image recognition using local vision LLM . The frontend app captures frames from your camera and sends them to a local vision language model. 
+AI then describes what it sees. 
 
-Inspired from https://github.ngxson.com/smolvlm-realtime-webcam/ but uses ollama or vllm for local model serving.
+Everything runs locally on your machine. No cloud APIs, no monthly subscriptions, no privacy concerns.
 
-* Prerequisites
+Inspired by https://github.ngxson.com/smolvlm-realtime-webcam/ but designed to work with your favorite local models.
 
-** System Requirements
-- Node.js 18+
-- Python 3.8+ (recommended for VLLM setup)
-- GPU with 4GB+ VRAM (recommended) or 8GB+ RAM for CPU inference
-- Optional: [[https://ollama.com/][Ollama]] for alternative model serving
+* What you'll need
 
-** Primary: VLLM with Lightweight Models (Linux Only)
+Don't worry - this is easier than it sounds:
 
-*Note: VLLM officially supports Linux only. For macOS users, see Ollama GGUF setup below.*
+- Node.js 18+ (for the web app)
+- [[https://ollama.com/][Ollama]] (this will run your AI models)
+- A decent computer (4GB+ RAM, GPU helps but isn't required)
+- A webcam inbuilt or connected to your computer (obviously!)
 
-Set up VLLM server for efficient Hugging Face models:
+* The easy way (recommended for everyone)
+
+We're going to use SmolVLM - it's like having a tiny but smart AI that can see. The best part is it's only 2GB and works great even without a fancy GPU.
+
+** Step 1: Get Ollama running
+
+First, [[https://ollama.com/download][download and install Ollama]] if you haven't already. It's like Docker but for AI models.
+
+** Step 2: Download the SmolVLM model
+
+This is where the magic happens. We'll grab a pre-optimized version:
 
 #+BEGIN_SRC bash
-# Install VLLM (in your virtual environment on Linux)
-pip install vllm transformers torch
-
-# Start VLLM server with SmolVLM (lightweight, fast)
-python -m vllm.entrypoints.openai.api_server \
-  --model HuggingFaceTB/SmolVLM-Instruct \
-  --port 8000 \
-  --served-model-name smolvlm \
-  --max-model-len 4096
-
-# Alternative lightweight models:
-# python -m vllm.entrypoints.openai.api_server \
-#   --model openbmb/MiniCPM-Llama3-V-2_5 \
-#   --port 8000 \
-#   --served-model-name minicpm-v
-#+END_SRC
-
-** Alternative: Ollama (For Heavy Models or GGUF SmolVLM)
-If you prefer traditional Ollama setup or want to use GGUF versions of SmolVLM:
-
-*** Option 1: SmolVLM GGUF Models (Lightweight Alternative)
-#+BEGIN_SRC bash
-# Download and use SmolVLM GGUF models via Ollama
-# These are quantized versions that run efficiently on Ollama
-
-# Method 1: Create Modelfile for SmolVLM GGUF (Recommended)
-# Download GGUF file first
+# Download the model file (about 2GB - grab a coffee!)
 wget https://huggingface.co/ggml-org/SmolVLM-Instruct-GGUF/resolve/main/SmolVLM-Instruct-Q4_K_M.gguf
 
-# Create Modelfile
+# Tell Ollama about our new model
 cat > Modelfile.smolvlm <<EOF
 FROM SmolVLM-Instruct-Q4_K_M.gguf
 
@@ -70,312 +54,237 @@ EOF
 
 # Create the model in Ollama
 ollama create smolvlm -f Modelfile.smolvlm
+#+END_SRC
 
-# Alternative smaller models:
+** Step 3: Try some alternatives (if you want)
+
+If SmolVLM doesn't work for you or you want to try something different:
+
+#+BEGIN_SRC bash
+# The classics that everyone loves
+ollama pull llava:13b      # Bigger, more capable, but slower
+ollama pull moondream      # Another lightweight option
+ollama pull llava:latest   # The latest and greatest
+
+# Even smaller SmolVLM variants (if you're really tight on resources)
 # wget https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/SmolVLM-500M-Instruct-Q4_K_M.gguf
 # wget https://huggingface.co/ggml-org/SmolVLM-256M-Instruct-GGUF/resolve/main/SmolVLM-256M-Instruct-Q4_K_M.gguf
 #+END_SRC
 
-*** Option 2: Traditional Ollama Models (Heavy)
-#+BEGIN_SRC bash
-# Install Ollama and pull heavy vision models
-ollama pull llava:13b
-# or for lighter Ollama usage
-ollama pull moondream
-# or latest llava
-ollama pull llava:latest
-#+END_SRC
+* Setting up the app
 
-* Installation & Setup
+** Get the code
 
-** 1. Clone the Repository
 #+BEGIN_SRC bash
 git clone <your-repo-url>
 cd local-llm-camera-app
 #+END_SRC
 
-** 2. Node.js Dependencies
+** Install dependencies
+
 #+BEGIN_SRC bash
 npm install
 #+END_SRC
 
-** 3. Python Virtual Environment (Linux Only - For VLLM)
+That's it! No Python virtual environments, no complicated setup. Just Node.js doing its thing.
+
+
+
+* Let's make it work!
+
+** Fire up Ollama
 
 #+BEGIN_SRC bash
-# Create virtual environment
-python3 -m venv venv
+# Start the Ollama service (keep this running in one terminal)
+ollama serve
+#+END_SRC
 
-# Activate virtual environment
-source venv/bin/activate
+** Test your model
 
-# Update pip and setuptools
+#+BEGIN_SRC bash
+# In another terminal, make sure your model works
+ollama run smolvlm
+# Try typing: "Hello, can you see?" 
+# If it responds, you're golden! Press Ctrl+D to exit.
+#+END_SRC
+
+** Start the web app
+
+#+BEGIN_SRC bash
+# Back in your app folder
+npm run dev
+#+END_SRC
+
+** Open it up
+
+Head to http://localhost:5173 in your browser. You should see your camera feed and some controls.
+
+*Pro tip:* Make sure you allow camera permissions when your browser asks!
+
+* Using the app
+
+Once everything is running, here's what you can play with:
+
+- *Base API*: Should be =http://localhost:11434= (Ollama's default)
+- *Model*: Pick =smolvlm= if you followed along, or whatever model you chose
+- *Instruction*: Try "What do you see?" or get creative!
+- *Interval*: Start with 1 second. SmolVLM is fast, so you can go down to 0.5s if you want
+
+The app has some neat camera controls:
+- *Pause*: Stops the AI analysis but keeps your camera on
+- *Stop & Close Camera*: Completely releases the camera (good for privacy!)
+- You can restart the camera anytime when you're not actively processing
+
+* When things go wrong (troubleshooting)
+
+** "Camera won't work"
+- Make sure you're using =http://localhost= (not some weird file:// URL)
+- Check your browser permissions - it might be blocking camera access
+- Try refreshing the page after allowing permissions
+
+** "Can't connect to model"
+- Check if Ollama is running: =ollama list= should show your models
+- Try =curl http://localhost:11434/api/tags= to see if Ollama is responding
+- Make sure your firewall isn't being overly protective of port 11434
+
+** "Model download failed"
+Try the old-school way:
+#+BEGIN_SRC bash
+# Download manually
+curl -L -o SmolVLM-Instruct-Q4_K_M.gguf \
+  "https://huggingface.co/ggml-org/SmolVLM-Instruct-GGUF/resolve/main/SmolVLM-Instruct-Q4_K_M.gguf"
+
+# Or use git if you have it set up with LFS
+git lfs install
+git clone https://huggingface.co/ggml-org/SmolVLM-Instruct-GGUF
+#+END_SRC
+
+** "Ollama model creation failed"
+Let's try the simple approach:
+#+BEGIN_SRC bash
+# Check if your GGUF file is there and readable
+ls -la SmolVLM-Instruct-Q4_K_M.gguf
+
+# Try a super basic Modelfile
+cat > Modelfile.simple <<EOF
+FROM SmolVLM-Instruct-Q4_K_M.gguf
+EOF
+
+ollama create smolvlm-simple -f Modelfile.simple
+#+END_SRC
+
+** "Everything is slow/broken"
+- Make sure you have enough RAM (8GB+ recommended)
+- Try the smaller SmolVLM variants (256M or 500M instead of 2B)
+- Increase the interval between requests to 2-3 seconds
+- Consider switching to =moondream= if SmolVLM doesn't work well
+
+* What's in the box?
+
+#+BEGIN_SRC
+.
+├── index.html          # The main web page
+├── package.json        # Node.js stuff (dependencies and scripts)
+├── vite.config.js      # Build tool configuration
+├── src/
+│   ├── App.jsx         # Main app component
+│   ├── CameraView.jsx  # Where the magic happens (camera + AI)
+│   └── main.jsx        # App entry point
+└── README.org          # This file you're reading
+#+END_SRC
+
+---
+
+* For Linux power users: The VLLM option
+
+*This section is for advanced users who want maximum performance on Linux servers or VMs.*
+
+If you're running this on a Linux server, have a good GPU, and want the absolute fastest inference, you can skip Ollama entirely and use VLLM. This is more complex but can be worth it for production deployments.
+
+** What you'll need (Linux only)
+
+- Linux (Ubuntu/CentOS/etc.)
+- Python 3.8+
+- NVIDIA GPU recommended (but CPU works)
+- More technical patience
+
+** Setup
+
+#+BEGIN_SRC bash
+# Create a Python virtual environment
+python3 -m venv vllm-env
+source vllm-env/bin/activate
+
+# Update pip
 pip install --upgrade pip setuptools
 
-# Install Rust (required for some VLLM dependencies)
+# Install Rust (VLLM needs it for some dependencies)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source ~/.cargo/env
 
-# Verify Rust installation
-rustc --version
-
-# Install core VLLM dependencies
+# Install VLLM and friends
 pip install vllm transformers torch
 #+END_SRC
 
-*Note: macOS users can skip this step and use Ollama GGUF setup instead.*
+** Running the VLLM server
 
-
-
-* Running the Application
-
-** Method 1: VLLM with Lightweight Models (Linux Only)
-
-In your activated virtual environment:
 #+BEGIN_SRC bash
-# Start VLLM server with SmolVLM (fastest, most efficient)
+# Activate your environment
+source vllm-env/bin/activate
+
+# Start the VLLM server with SmolVLM
 python -m vllm.entrypoints.openai.api_server \
   --model HuggingFaceTB/SmolVLM-Instruct \
   --port 8000 \
   --served-model-name smolvlm \
   --max-model-len 4096
 
-# For CPU-only inference (slower but no GPU required):
-# python -m vllm.entrypoints.openai.api_server \
-#   --model HuggingFaceTB/SmolVLM-Instruct \
-#   --port 8000 \
-#   --served-model-name smolvlm \
-#   --device cpu
+# For CPU-only (slower but works without GPU)
+python -m vllm.entrypoints.openai.api_server \
+  --model HuggingFaceTB/SmolVLM-Instruct \
+  --port 8000 \
+  --served-model-name smolvlm \
+  --device cpu
 #+END_SRC
 
-*** Configure React App
-Set the following in your React app interface:
+** Using with the web app
+
+In the app interface, change:
 - Base API: =http://localhost:8000=
 - Model: =smolvlm=
 
-*** Start the Development Server
+** VLLM troubleshooting
+
+*** If Rust compiler fails
 #+BEGIN_SRC bash
-npm run dev
-#+END_SRC
-
-** Method 2: Ollama with GGUF SmolVLM (Cross-Platform)
-
-*** Option 1: SmolVLM GGUF (Lightweight via Ollama)
-#+BEGIN_SRC bash
-# Start Ollama service
-ollama serve
-
-# Use your custom SmolVLM model
-ollama run smolvlm
-#+END_SRC
-
-*** Option 2: Traditional Heavy Models
-#+BEGIN_SRC bash
-# Start Ollama service  
-ollama serve
-#+END_SRC
-
-*** Configure React App
-Set the following in your React app interface:
-- Base API: =http://localhost:11434= (default)
-- Model: =smolvlm= (GGUF), =llava=, =moondream=, etc.
-
-*** 3. Start the Development Server
-#+BEGIN_SRC bash
-npm run dev
-#+END_SRC
-
-** 3. Open in Browser
-Navigate to the printed local URL (typically =http://localhost:5173=).
-
-*Important:* For camera permissions to work properly, ensure you're accessing via =http://localhost= (not =file://=).
-
-* Configuration
-
-** Recommended Lightweight Models (Primary)
-Optimized for speed and efficiency on consumer hardware:
-- =HuggingFaceTB/SmolVLM-Instruct= - Ultra-lightweight, fastest inference
-- =openbmb/MiniCPM-Llama3-V-2_5= - Balanced performance/quality
-- =microsoft/Florence-2-large= - Microsoft's efficient vision model
-
-** Model Selection
-- Method 1: VLLM-served Hugging Face models (Linux only - SmolVLM, MiniCPM-V, etc.)
-- Method 2: Ollama GGUF SmolVLM models (Cross-platform - lightweight, quantized)
-- Method 3: Ollama traditional models (Cross-platform - llava, moondream, etc.)
-- Default API configuration:
-  - VLLM: Base API =http://localhost:8000=, Model =smolvlm=
-  - Ollama GGUF: Base API =http://localhost:11434=, Model =smolvlm=
-  - Ollama Traditional: Base API =http://localhost:11434=, Model =llava= or =moondream=
-
-** Performance Tuning
-- *Interval*: Start with 0.5-1 second for lightweight models (vs 1-2s for heavy models)
-- *Base API*: 
-  - VLLM (Linux): =http://localhost:8000=
-  - Ollama (Cross-platform): =http://localhost:11434=
-- *Image Quality*: Can use higher resolution with lightweight models
-- *Model Choice*: SmolVLM offers best speed/quality balance
-
-** API Endpoint
-The application supports both lightweight and heavy model backends:
-
-*** VLLM (Linux Only - Lightweight Models)
-- Endpoint: =http://localhost:8000/v1/chat/completions=
-- Message format: ={type: "image_url"}= (OpenAI-compatible)
-- Model parameter: served model name (e.g., "smolvlm", "minicpm-v")
-- Advantages: Fastest inference, lower memory usage, better GPU utilization
-
-*** Ollama (Cross-Platform - GGUF SmolVLM & Traditional Models)
-- Endpoint: =http://localhost:11434/v1/chat/completions=
-- Message format: ={type: "image_url"}=
-- Model parameter: configurable via UI (e.g., "smolvlm", "llava", "moondream")
-- Advantages: Cross-platform support, GGUF quantization, easier setup
-
-* Troubleshooting
-
-** Camera Permission Issues
-- Ensure you're using =http://localhost= (not =file://=)
-- Check browser permissions for camera access
-- Try refreshing the page after granting permissions
-
-** VLLM Connection Issues (Linux Method)
-- Check if VLLM server is running: =curl http://localhost:8000/v1/models=
-- Verify the model is loaded: check terminal output from VLLM server
-- Ensure sufficient GPU/CPU memory for the model
-- Try SmolVLM if running out of memory (smallest model)
-- For CPU-only: add =--device cpu= flag to VLLM command
-
-** VLLM Installation Issues
-*** Rust Compiler Error
-If you encounter "can't find Rust compiler" during VLLM installation:
-
-#+BEGIN_SRC bash
-# Install Rust toolchain
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# Make sure Rust is in your PATH
 source ~/.cargo/env
-
-# Verify installation
 rustc --version
 
-# Restart your terminal or source your shell profile
+# Restart your terminal if needed
 source ~/.bashrc  # or ~/.zshrc
-
-# Try installing VLLM again
-pip install vllm
 #+END_SRC
 
-*** Alternative: Use Pre-built Wheels
-If Rust installation fails, try installing VLLM with pre-built wheels:
+*** If installation is still broken
+Try pre-built wheels:
 #+BEGIN_SRC bash
 # For CUDA 11.8
 pip install vllm --extra-index-url https://download.pytorch.org/whl/cu118
 
-# For CUDA 12.1
+# For CUDA 12.1  
 pip install vllm --extra-index-url https://download.pytorch.org/whl/cu121
 
 # For CPU-only
 pip install vllm --extra-index-url https://download.pytorch.org/whl/cpu
 #+END_SRC
 
-** Ollama Connection Issues (Cross-Platform Method)
-- Verify Ollama is running: =ollama list=
-- Check if the service is accessible: =curl http://localhost:11434/api/tags=
-- Ensure firewall isn't blocking port 11434
-
-** SmolVLM GGUF Setup Issues
-*** GGUF Model Download
-If GGUF download fails:
+*** Performance monitoring
 #+BEGIN_SRC bash
-# Use alternative download methods
-curl -L -o SmolVLM-Instruct-Q4_K_M.gguf \
-  "https://huggingface.co/ggml-org/SmolVLM-Instruct-GGUF/resolve/main/SmolVLM-Instruct-Q4_K_M.gguf"
+# Check if your GPU is being used
+nvidia-smi
 
-# Or use git-lfs
-git lfs install
-git clone https://huggingface.co/ggml-org/SmolVLM-Instruct-GGUF
+# Test the VLLM server
+curl http://localhost:8000/v1/models
 #+END_SRC
 
-*** Modelfile Issues
-If Ollama model creation fails:
-#+BEGIN_SRC bash
-# Verify GGUF file exists and is readable
-ls -la SmolVLM-Instruct-Q4_K_M.gguf
-
-# Check Ollama logs for errors
-ollama logs
-
-# Try simpler Modelfile
-cat > Modelfile.smolvlm.simple <<EOF
-FROM SmolVLM-Instruct-Q4_K_M.gguf
-EOF
-
-ollama create smolvlm-simple -f Modelfile.smolvlm.simple
-#+END_SRC
-
-** Model Loading Issues
-*** VLLM (Linux Method)
-- Check model name spelling in the server command
-- Verify Hugging Face model exists: visit model page on hf.co
-- Ensure sufficient disk space for model download
-- Monitor GPU memory usage: =nvidia-smi= (for NVIDIA GPUs)
-- Try smaller models if memory issues persist
-
-*** Ollama (Cross-Platform Method)
-- Confirm model is pulled: =ollama list=
-- Try switching to a lighter model like =moondream=
-- Check Ollama logs for error messages
-
-* Project Structure
-
-#+BEGIN_SRC
-.
-├── index.html          # Entry HTML file
-├── package.json        # Node.js dependencies
-├── vite.config.js      # Vite configuration
-├── src/
-│   ├── App.jsx         # Main application component
-│   ├── CameraView.jsx  # Camera capture component
-│   └── main.jsx        # Application entry point
-├── venv/               # Python virtual environment (Linux only)
-└── README.org          # This file
-#+END_SRC
-
-* Development
-
-** Available Scripts
-- =npm run dev= - Start development server
-- =npm run build= - Build for production
-- =npm run preview= - Preview production build
-
-** Virtual Environment Management
-#+BEGIN_SRC bash
-# Activate environment
-source venv/bin/activate
-
-# Deactivate environment
-deactivate
-
-# Remove environment (if needed)
-rm -rf venv
-#+END_SRC
-
-* Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with different vision models
-5. Submit a pull request
-
-* License
-
-See =LICENSE= file for details.
-
-* Notes
-
-- *Linux Users*: Use VLLM for best performance (fastest, lower memory)
-- *macOS/Windows Users*: Use Ollama GGUF SmolVLM for lightweight models
-- *Lightweight Models*: Adjust *Interval* to 0.5-1 second for quick responses
-- *Heavy Models*: Use 1–2 seconds interval to prevent system overload  
-- You can change the *Base API* in the React interface to switch between VLLM and Ollama
-- The app uses =/v1/chat/completions= with =model= parameter and ={type:"image_url"}= messages
-- For production deployment, consider implementing rate limiting and error handling
-- GPU recommended but not required - SmolVLM runs efficiently on CPU
+*Why use VLLM?* It's significantly faster than Ollama, uses less VRAM, and is designed for production deployments. But it's Linux-only and more complex to set up.
