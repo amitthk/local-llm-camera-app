@@ -1,0 +1,1277 @@
+import React, { useState, useEffect } from 'react';
+import Plot from 'react-plotly.js';
+import './TechnicalAnalysisTutorial.css';
+
+const TechnicalAnalysisTutorial = () => {
+  const [activeSection, setActiveSection] = useState('introduction');
+  const [stockData, setStockData] = useState(null);
+  const [indicators, setIndicators] = useState({});
+
+  // Educational content sections
+  const sections = {
+    introduction: {
+      title: " Introduction to Technical Analysis",
+      content: (
+        <div className="tutorial-content">
+          <h3>What is Technical Analysis?</h3>
+          <p>Technical analysis is the study of past market data, primarily price and volume, to forecast future price direction. It's based on three key principles:</p>
+          
+          <div className="principle-box">
+            <h4>1. Market Action Discounts Everything</h4>
+            <p>All relevant information (fundamental, economic, political) is already reflected in the stock price.</p>
+          </div>
+          
+          <div className="principle-box">
+            <h4>2. Price Moves in Trends</h4>
+            <p>Stock prices tend to move in identifiable trends that persist over time.</p>
+          </div>
+          
+          <div className="principle-box">
+            <h4>3. History Tends to Repeat Itself</h4>
+            <p>Market psychology is predictable, and similar patterns tend to repeat.</p>
+          </div>
+          
+          <h3>Types of Analysis</h3>
+          <div className="analysis-types">
+            <div className="type-card">
+              <h4> Chart Patterns</h4>
+              <p>Visual patterns formed by price movements that help predict future direction.</p>
+            </div>
+            <div className="type-card">
+              <h4> Technical Indicators</h4>
+              <p>Mathematical calculations based on price and volume data.</p>
+            </div>
+            <div className="type-card">
+              <h4> Support & Resistance</h4>
+              <p>Key price levels where buying or selling pressure is concentrated.</p>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    
+    trendlines: {
+      title: " Understanding Trend Lines",
+      content: (
+        <div className="tutorial-content">
+          <h3>What are Trend Lines?</h3>
+          <p>Trend lines are straight lines that connect two or more price points and extend into the future to act as lines of support or resistance.</p>
+          
+          <div className="trend-types">
+            <div className="trend-card uptrend">
+              <h4> Uptrend</h4>
+              <p><strong>Definition:</strong> Series of higher highs and higher lows</p>
+              <p><strong>How to draw:</strong> Connect two or more significant lows</p>
+              <p><strong>Signal:</strong> Bullish market sentiment</p>
+              <p><strong>Trading:</strong> Buy on dips to the trend line</p>
+            </div>
+            
+            <div className="trend-card downtrend">
+              <h4> Downtrend</h4>
+              <p><strong>Definition:</strong> Series of lower highs and lower lows</p>
+              <p><strong>How to draw:</strong> Connect two or more significant highs</p>
+              <p><strong>Signal:</strong> Bearish market sentiment</p>
+              <p><strong>Trading:</strong> Sell on rallies to the trend line</p>
+            </div>
+            
+            <div className="trend-card sideways">
+              <h4>↔ Sideways Trend</h4>
+              <p><strong>Definition:</strong> Price moves within horizontal boundaries</p>
+              <p><strong>How to draw:</strong> Connect similar highs and lows</p>
+              <p><strong>Signal:</strong> Market consolidation</p>
+              <p><strong>Trading:</strong> Buy at support, sell at resistance</p>
+            </div>
+          </div>
+          
+          <div className="tip-box">
+            <h4> Pro Tips</h4>
+            <ul>
+              <li>More touches make the trend line more reliable</li>
+              <li>Steeper trend lines are more likely to break</li>
+              <li>Volume should confirm trend line breaks</li>
+              <li>Use multiple timeframes for better analysis</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    
+    movingaverages: {
+      title: " Moving Averages",
+      content: (
+        <div className="tutorial-content">
+          <h3>Moving Averages Explained</h3>
+          <p>Moving averages smooth out price data to identify trend direction and generate trading signals.</p>
+          
+          <div className="ma-types">
+            <div className="ma-card">
+              <h4>Simple Moving Average (SMA)</h4>
+              <div className="formula">
+                <strong>Formula:</strong> SMA = (P₁ + P₂ + ... + Pₙ) / n
+              </div>
+              <p><strong>Pros:</strong> Simple to calculate, smooth data</p>
+              <p><strong>Cons:</strong> Lagging indicator, equal weight to all periods</p>
+            </div>
+            
+            <div className="ma-card">
+              <h4>Exponential Moving Average (EMA)</h4>
+              <div className="formula">
+                <strong>Formula:</strong> EMA = (Close × Multiplier) + (Previous EMA × (1 - Multiplier))
+                <br />
+                <strong>Multiplier:</strong> 2 / (n + 1)
+              </div>
+              <p><strong>Pros:</strong> More responsive, gives more weight to recent prices</p>
+              <p><strong>Cons:</strong> More sensitive to false signals</p>
+            </div>
+          </div>
+          
+          <h3>Common Moving Average Strategies</h3>
+          <div className="strategy-grid">
+            <div className="strategy-card">
+              <h4> Golden Cross</h4>
+              <p>When 50-day MA crosses above 200-day MA</p>
+              <p><strong>Signal:</strong> <span className="bullish-text">Bullish</span></p>
+            </div>
+            
+            <div className="strategy-card">
+              <h4> Death Cross</h4>
+              <p>When 50-day MA crosses below 200-day MA</p>
+              <p><strong>Signal:</strong> <span className="bearish-text">Bearish</span></p>
+            </div>
+            
+            <div className="strategy-card">
+              <h4> MA Ribbon</h4>
+              <p>Multiple MAs of different periods</p>
+              <p><strong>Signal:</strong> <span className="neutral-text">Trend Strength</span></p>
+            </div>
+          </div>
+          
+          <div className="period-guide">
+            <h4> Common Periods</h4>
+            <ul>
+              <li><strong>Short-term:</strong> 5, 10, 20 days</li>
+              <li><strong>Medium-term:</strong> 50, 100 days</li>
+              <li><strong>Long-term:</strong> 200 days</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    
+    oscillators: {
+      title: " Oscillators (RSI, Stochastic)",
+      content: (
+        <div className="tutorial-content">
+          <h3>Understanding Oscillators</h3>
+          <p>Oscillators are bounded indicators that fluctuate between fixed upper and lower limits. They're excellent for identifying overbought and oversold conditions.</p>
+          
+          <div className="oscillator-section">
+            <h4> Relative Strength Index (RSI)</h4>
+            <div className="formula-detailed">
+              <p><strong>Step 1:</strong> Calculate average gains and losses over 14 periods</p>
+              <p><strong>Step 2:</strong> RS = Average Gain / Average Loss</p>
+              <p><strong>Step 3:</strong> RSI = 100 - (100 / (1 + RS))</p>
+            </div>
+            
+            <div className="rsi-levels">
+              <div className="level-card overbought">
+                <h5> Overbought (70-100)</h5>
+                <p>Potential sell signal, price may decline</p>
+              </div>
+              <div className="level-card neutral">
+                <h5> Neutral (30-70)</h5>
+                <p>No clear signal, trend following mode</p>
+              </div>
+              <div className="level-card oversold">
+                <h5> Oversold (0-30)</h5>
+                <p>Potential buy signal, price may rise</p>
+              </div>
+            </div>
+            
+            <div className="rsi-strategies">
+              <h5>RSI Trading Strategies</h5>
+              <ul>
+                <li><strong>Divergence:</strong> Price makes new high/low but RSI doesn't</li>
+                <li><strong>Centerline Cross:</strong> RSI crossing above/below 50</li>
+                <li><strong>Failure Swings:</strong> RSI fails to exceed previous high/low</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="oscillator-section">
+            <h4> Stochastic Oscillator</h4>
+            <div className="formula-detailed">
+              <p><strong>%K:</strong> ((Current Close - Lowest Low) / (Highest High - Lowest Low)) × 100</p>
+              <p><strong>%D:</strong> 3-period SMA of %K</p>
+            </div>
+            
+            <div className="stochastic-signals">
+              <div className="signal-card">
+                <h5> Buy Signals</h5>
+                <ul>
+                  <li>%K crosses above %D below 20</li>
+                  <li>Both oscillators exit oversold territory</li>
+                  <li>Bullish divergence with price</li>
+                </ul>
+              </div>
+              
+              <div className="signal-card">
+                <h5> Sell Signals</h5>
+                <ul>
+                  <li>%K crosses below %D above 80</li>
+                  <li>Both oscillators exit overbought territory</li>
+                  <li>Bearish divergence with price</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div className="oscillator-tips">
+            <h4> Oscillator Tips</h4>
+            <ul>
+              <li>Work best in sideways/range-bound markets</li>
+              <li>Can give false signals in strong trends</li>
+              <li>Use with trend-following indicators for confirmation</li>
+              <li>Adjust overbought/oversold levels for different markets</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    
+    macd: {
+      title: " MACD Deep Dive",
+      content: (
+        <div className="tutorial-content">
+          <h3>MACD - Moving Average Convergence Divergence</h3>
+          <p>MACD is a trend-following momentum indicator that shows the relationship between two moving averages.</p>
+          
+          <div className="macd-components">
+            <div className="component-card">
+              <h4> MACD Line</h4>
+              <div className="formula">EMA(12) - EMA(26)</div>
+              <p>Shows the convergence and divergence of short and long-term trends</p>
+            </div>
+            
+            <div className="component-card">
+              <h4> Signal Line</h4>
+              <div className="formula">EMA(9) of MACD Line</div>
+              <p>Smoothed version of MACD line used for signal generation</p>
+            </div>
+            
+            <div className="component-card">
+              <h4> Histogram</h4>
+              <div className="formula">MACD Line - Signal Line</div>
+              <p>Shows the momentum of the momentum indicator</p>
+            </div>
+          </div>
+          
+          <div className="macd-signals">
+            <h4> MACD Trading Signals</h4>
+            
+            <div className="signal-section">
+              <h5>1. Signal Line Crossovers</h5>
+              <div className="crossover-signals">
+                <div className="signal bullish">
+                  <h6> Bullish Crossover</h6>
+                  <p>MACD line crosses above signal line</p>
+                  <p><strong>Action:</strong> Consider buying</p>
+                </div>
+                <div className="signal bearish">
+                  <h6> Bearish Crossover</h6>
+                  <p>MACD line crosses below signal line</p>
+                  <p><strong>Action:</strong> Consider selling</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="signal-section">
+              <h5>2. Zero Line Crossovers</h5>
+              <div className="zero-signals">
+                <div className="signal bullish">
+                  <h6> Above Zero</h6>
+                  <p>MACD line crosses above zero line</p>
+                  <p><strong>Meaning:</strong> Uptrend confirmation</p>
+                </div>
+                <div className="signal bearish">
+                  <h6> Below Zero</h6>
+                  <p>MACD line crosses below zero line</p>
+                  <p><strong>Meaning:</strong> Downtrend confirmation</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="signal-section">
+              <h5>3. Divergence</h5>
+              <div className="divergence-types">
+                <div className="divergence bullish">
+                  <h6> Bullish Divergence</h6>
+                  <p>Price makes lower lows, MACD makes higher lows</p>
+                  <p><strong>Signal:</strong> Potential upward reversal</p>
+                </div>
+                <div className="divergence bearish">
+                  <h6> Bearish Divergence</h6>
+                  <p>Price makes higher highs, MACD makes lower highs</p>
+                  <p><strong>Signal:</strong> Potential downward reversal</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="macd-advanced">
+            <h4> Advanced MACD Concepts</h4>
+            <div className="advanced-grid">
+              <div className="concept-card">
+                <h5>Histogram Analysis</h5>
+                <p>Increasing histogram = strengthening momentum</p>
+                <p>Decreasing histogram = weakening momentum</p>
+              </div>
+              
+              <div className="concept-card">
+                <h5>Multiple Timeframes</h5>
+                <p>Use weekly MACD for trend direction</p>
+                <p>Use daily MACD for entry/exit timing</p>
+              </div>
+              
+              <div className="concept-card">
+                <h5>Parameter Adjustment</h5>
+                <p>Shorter periods = more sensitive</p>
+                <p>Longer periods = less noise</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    
+    bollinger: {
+      title: " Bollinger Bands Strategy",
+      content: (
+        <div className="tutorial-content">
+          <h3>Bollinger Bands - Volatility Analysis</h3>
+          <p>Bollinger Bands consist of three lines: a simple moving average and two standard deviation bands above and below it.</p>
+          
+          <div className="bb-construction">
+            <h4>️ Band Construction</h4>
+            <div className="band-formulas">
+              <div className="band-formula">
+                <h5>Upper Band</h5>
+                <div className="formula">SMA(20) + (2 × Standard Deviation)</div>
+              </div>
+              <div className="band-formula">
+                <h5>Middle Band</h5>
+                <div className="formula">Simple Moving Average (20)</div>
+              </div>
+              <div className="band-formula">
+                <h5>Lower Band</h5>
+                <div className="formula">SMA(20) - (2 × Standard Deviation)</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bb-interpretation">
+            <h4> Interpretation Guide</h4>
+            
+            <div className="interpretation-grid">
+              <div className="interp-card">
+                <h5> Band Squeeze</h5>
+                <p><strong>When:</strong> Bands contract (low volatility)</p>
+                <p><strong>Meaning:</strong> Potential breakout coming</p>
+                <p><strong>Action:</strong> Prepare for large price move</p>
+              </div>
+              
+              <div className="interp-card">
+                <h5> Band Expansion</h5>
+                <p><strong>When:</strong> Bands widen (high volatility)</p>
+                <p><strong>Meaning:</strong> Strong trend in progress</p>
+                <p><strong>Action:</strong> Trend continuation likely</p>
+              </div>
+              
+              <div className="interp-card">
+                <h5> Band Touch</h5>
+                <p><strong>Upper Band:</strong> Potential resistance</p>
+                <p><strong>Lower Band:</strong> Potential support</p>
+                <p><strong>Action:</strong> Look for reversal signals</p>
+              </div>
+              
+              <div className="interp-card">
+                <h5> Band Walk</h5>
+                <p><strong>When:</strong> Price runs along a band</p>
+                <p><strong>Meaning:</strong> Very strong trend</p>
+                <p><strong>Action:</strong> Don't fade the trend</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bb-strategies">
+            <h4> Trading Strategies</h4>
+            
+            <div className="strategy-section">
+              <h5>1. Bollinger Bounce</h5>
+              <div className="bounce-strategy">
+                <div className="bounce-step">
+                  <h6> Setup</h6>
+                  <p>Price touches lower band in sideways market</p>
+                </div>
+                <div className="bounce-step">
+                  <h6> Entry</h6>
+                  <p>Buy when price bounces off lower band</p>
+                </div>
+                <div className="bounce-step">
+                  <h6> Target</h6>
+                  <p>Upper band or middle band</p>
+                </div>
+                <div className="bounce-step">
+                  <h6> Stop</h6>
+                  <p>Below recent low or band touch</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="strategy-section">
+              <h5>2. Bollinger Breakout</h5>
+              <div className="breakout-strategy">
+                <div className="breakout-step">
+                  <h6> Setup</h6>
+                  <p>Squeeze followed by expansion</p>
+                </div>
+                <div className="breakout-step">
+                  <h6> Entry</h6>
+                  <p>Price breaks above/below bands with volume</p>
+                </div>
+                <div className="breakout-step">
+                  <h6> Target</h6>
+                  <p>Measured move or next resistance/support</p>
+                </div>
+                <div className="breakout-step">
+                  <h6> Stop</h6>
+                  <p>Back inside the bands</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bb-tips">
+            <h4> Pro Tips</h4>
+            <ul>
+              <li>Use RSI with Bollinger Bands for confirmation</li>
+              <li>Look for double bottoms at the lower band</li>
+              <li>Watch for volume confirmation on breakouts</li>
+              <li>Adjust parameters for different market conditions</li>
+              <li>Don't assume upper band = sell, lower band = buy</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    
+    fundamental_intro: {
+      title: " Fundamental Analysis Basics",
+      content: (
+        <div className="tutorial-content">
+          <h3>What is Fundamental Analysis?</h3>
+          <p>Fundamental analysis evaluates a company's intrinsic value by examining economic, financial, and qualitative factors that could affect its stock price.</p>
+          
+          <div className="principle-box">
+            <h4> Core Philosophy</h4>
+            <p>Every stock has an intrinsic value based on the company's financial health, business model, and growth prospects. Market prices may deviate from this value, creating investment opportunities.</p>
+          </div>
+          
+          <h3>Fundamental vs Technical Analysis</h3>
+          <div className="analysis-comparison">
+            <div className="comparison-card fundamental">
+              <h4> Fundamental Analysis</h4>
+              <ul>
+                <li><strong>Focus:</strong> Company's intrinsic value</li>
+                <li><strong>Time Horizon:</strong> Long-term (months to years)</li>
+                <li><strong>Data Used:</strong> Financial statements, earnings, ratios</li>
+                <li><strong>Goal:</strong> Determine if stock is over/undervalued</li>
+                <li><strong>Best For:</strong> Value investing, long-term growth</li>
+              </ul>
+            </div>
+            <div className="comparison-card technical">
+              <h4> Technical Analysis</h4>
+              <ul>
+                <li><strong>Focus:</strong> Price patterns and trends</li>
+                <li><strong>Time Horizon:</strong> Short to medium-term</li>
+                <li><strong>Data Used:</strong> Price charts, volume, indicators</li>
+                <li><strong>Goal:</strong> Predict future price movements</li>
+                <li><strong>Best For:</strong> Trading, timing entries/exits</li>
+              </ul>
+            </div>
+          </div>
+          
+          <h3>Types of Fundamental Analysis</h3>
+          <div className="analysis-types">
+            <div className="type-card">
+              <h4> Qualitative Analysis</h4>
+              <p>Business model, management quality, competitive advantages, industry trends</p>
+            </div>
+            <div className="type-card">
+              <h4> Quantitative Analysis</h4>
+              <p>Financial ratios, earnings growth, revenue trends, balance sheet strength</p>
+            </div>
+            <div className="type-card">
+              <h4> Macroeconomic Analysis</h4>
+              <p>Economic conditions, interest rates, industry cycles, market sentiment</p>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    
+    financial_ratios: {
+      title: " Key Financial Ratios",
+      content: (
+        <div className="tutorial-content">
+          <h3>Essential Financial Ratios for Stock Analysis</h3>
+          <p>Financial ratios help investors evaluate a company's performance, financial health, and valuation relative to peers and historical performance.</p>
+          
+          <div className="ratio-category">
+            <h4> Profitability Ratios</h4>
+            <div className="ratio-grid">
+              <div className="ratio-card">
+                <h5>Return on Equity (ROE)</h5>
+                <div className="formula">ROE = Net Income / Shareholders' Equity</div>
+                <p><strong>Good Range:</strong> 15-20%+</p>
+                <p><strong>Meaning:</strong> How efficiently a company uses shareholder money to generate profit</p>
+                <div className="interpretation">
+                  <span className="good"> High ROE:</span> Efficient management, strong profitability<br/>
+                  <span className="bad"> Low ROE:</span> Poor capital utilization, weak performance
+                </div>
+              </div>
+              
+              <div className="ratio-card">
+                <h5>Net Profit Margin</h5>
+                <div className="formula">Net Margin = Net Income / Revenue × 100</div>
+                <p><strong>Good Range:</strong> 10%+ (varies by industry)</p>
+                <p><strong>Meaning:</strong> How much profit a company makes for every dollar of revenue</p>
+                <div className="interpretation">
+                  <span className="good"> High Margin:</span> Efficient operations, pricing power<br/>
+                  <span className="bad"> Low Margin:</span> Competitive pressure, high costs
+                </div>
+              </div>
+              
+              <div className="ratio-card">
+                <h5>Gross Profit Margin</h5>
+                <div className="formula">Gross Margin = Gross Profit / Revenue × 100</div>
+                <p><strong>Good Range:</strong> 40%+ (varies significantly by industry)</p>
+                <p><strong>Meaning:</strong> Percentage of revenue remaining after direct costs</p>
+                <div className="interpretation">
+                  <span className="good"> High Margin:</span> Strong pricing power, low production costs<br/>
+                  <span className="bad"> Low Margin:</span> Commodity business, intense competition
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="ratio-category">
+            <h4> Valuation Ratios</h4>
+            <div className="ratio-grid">
+              <div className="ratio-card">
+                <h5>Price-to-Earnings (P/E)</h5>
+                <div className="formula">P/E = Stock Price / Earnings Per Share</div>
+                <p><strong>Typical Range:</strong> 10-25 (varies by industry and growth)</p>
+                <p><strong>Meaning:</strong> How much investors pay for each dollar of earnings</p>
+                <div className="interpretation">
+                  <span className="good"> Low P/E:</span> Potentially undervalued, value opportunity<br/>
+                  <span class="bad"> High P/E:</span> Potentially overvalued, high growth expectations
+                </div>
+              </div>
+              
+              <div className="ratio-card">
+                <h5>Price-to-Book (P/B)</h5>
+                <div className="formula">P/B = Stock Price / Book Value Per Share</div>
+                <p><strong>Good Range:</strong> 1-3 (lower generally better)</p>
+                <p><strong>Meaning:</strong> How much investors pay relative to company's net worth</p>
+                <div className="interpretation">
+                  <span className="good"> Low P/B:</span> Trading near asset value, potential bargain<br/>
+                  <span className="neutral">️ High P/B:</span> Premium valuation, growth expectations
+                </div>
+              </div>
+              
+              <div className="ratio-card">
+                <h5>Price/Earnings-to-Growth (PEG)</h5>
+                <div className="formula">PEG = P/E Ratio / Annual EPS Growth Rate</div>
+                <p><strong>Good Range:</strong> &lt; 1.0 (lower is better)</p>
+                <p><strong>Meaning:</strong> P/E ratio adjusted for earnings growth rate</p>
+                <div className="interpretation">
+                  <span className="good"> PEG &lt; 1:</span> Undervalued relative to growth<br/>
+                  <span className="bad"> PEG &gt; 1:</span> Overvalued relative to growth
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="ratio-category">
+            <h4> Financial Health Ratios</h4>
+            <div className="ratio-grid">
+              <div className="ratio-card">
+                <h5>Current Ratio</h5>
+                <div className="formula">Current Ratio = Current Assets / Current Liabilities</div>
+                <p><strong>Good Range:</strong> 1.5-3.0</p>
+                <p><strong>Meaning:</strong> Company's ability to pay short-term obligations</p>
+                <div className="interpretation">
+                  <span className="good"> Ratio 1.5-3:</span> Healthy liquidity position<br/>
+                  <span className="bad"> Ratio &lt; 1:</span> Potential liquidity problems
+                </div>
+              </div>
+              
+              <div className="ratio-card">
+                <h5>Debt-to-Equity</h5>
+                <div className="formula">D/E = Total Debt / Total Equity</div>
+                <p><strong>Good Range:</strong> &lt; 0.5 (varies by industry)</p>
+                <p><strong>Meaning:</strong> How much debt a company uses relative to equity</p>
+                <div className="interpretation">
+                  <span className="good"> Low D/E:</span> Conservative financing, lower risk<br/>
+                  <span className="bad"> High D/E:</span> High leverage, financial risk
+                </div>
+              </div>
+              
+              <div className="ratio-card">
+                <h5>Interest Coverage</h5>
+                <div className="formula">Coverage = EBIT / Interest Expense</div>
+                <p><strong>Good Range:</strong> 5+ times</p>
+                <p><strong>Meaning:</strong> Company's ability to pay interest on debt</p>
+                <div className="interpretation">
+                  <span className="good"> High Coverage:</span> Can easily service debt<br/>
+                  <span className="bad"> Low Coverage:</span> Difficulty paying interest
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="ratio-tips">
+            <h4> Ratio Analysis Tips</h4>
+            <ul>
+              <li><strong>Compare to Industry:</strong> Ratios vary significantly between industries</li>
+              <li><strong>Look at Trends:</strong> Track ratios over 3-5 years to see improvement/deterioration</li>
+              <li><strong>Use Multiple Ratios:</strong> No single ratio tells the complete story</li>
+              <li><strong>Consider Business Cycle:</strong> Some ratios fluctuate with economic cycles</li>
+              <li><strong>Quality Matters:</strong> High-quality companies can sustain premium valuations</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    
+    earnings_analysis: {
+      title: " Earnings & Growth Analysis",
+      content: (
+        <div className="tutorial-content">
+          <h3>Understanding Earnings and Growth Metrics</h3>
+          <p>Earnings analysis is the cornerstone of fundamental analysis. Understanding how companies generate and grow earnings is crucial for investment decisions.</p>
+          
+          <div className="earnings-section">
+            <h4> Key Earnings Metrics</h4>
+            
+            <div className="earnings-grid">
+              <div className="earnings-card">
+                <h5>Earnings Per Share (EPS)</h5>
+                <div className="formula">EPS = Net Income / Outstanding Shares</div>
+                <p><strong>Why Important:</strong> Shows company's profitability per share</p>
+                <div className="eps-types">
+                  <p><strong>Basic EPS:</strong> Uses current outstanding shares</p>
+                  <p><strong>Diluted EPS:</strong> Includes potential shares from options, convertibles</p>
+                </div>
+                <div className="growth-indicators">
+                  <span className="good"> Growing EPS:</span> Increasing profitability<br/>
+                  <span className="bad"> Declining EPS:</span> Profitability concerns
+                </div>
+              </div>
+              
+              <div className="earnings-card">
+                <h5>Earnings Growth Rate</h5>
+                <div className="formula">Growth Rate = ((Current EPS - Previous EPS) / Previous EPS) × 100</div>
+                <p><strong>Benchmark:</strong> 10-15% annual growth is generally strong</p>
+                <div className="growth-categories">
+                  <p><strong>High Growth:</strong> 20%+ (often technology, biotech)</p>
+                  <p><strong>Moderate Growth:</strong> 10-20% (many mature companies)</p>
+                  <p><strong>Low Growth:</strong> 0-10% (utilities, mature industries)</p>
+                </div>
+              </div>
+              
+              <div className="earnings-card">
+                <h5>Revenue Growth</h5>
+                <div className="formula">Revenue Growth = ((Current Revenue - Previous Revenue) / Previous Revenue) × 100</div>
+                <p><strong>Importance:</strong> Shows business expansion and market demand</p>
+                <div className="revenue-insights">
+                  <p><strong>Organic Growth:</strong> Internal business expansion</p>
+                  <p><strong>Acquisition Growth:</strong> Growth through acquisitions</p>
+                  <p><strong>Quality Check:</strong> Organic growth is generally more sustainable</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="earnings-quality">
+            <h4>🔍 Earnings Quality Analysis</h4>
+            
+            <div className="quality-factors">
+              <div className="quality-card">
+                <h5> High-Quality Earnings Indicators</h5>
+                <ul>
+                  <li><strong>Cash Flow Matches Earnings:</strong> Operating cash flow ≥ net income</li>
+                  <li><strong>Consistent Growth:</strong> Steady earnings progression over years</li>
+                  <li><strong>Conservative Accounting:</strong> Realistic revenue recognition</li>
+                  <li><strong>Low One-Time Items:</strong> Minimal extraordinary gains/losses</li>
+                  <li><strong>Growing Margins:</strong> Improving profitability over time</li>
+                </ul>
+              </div>
+              
+              <div className="quality-card">
+                <h5>️ Earnings Quality Red Flags</h5>
+                <ul>
+                  <li><strong>Cash Flow &lt; Earnings:</strong> Potential accounting manipulation</li>
+                  <li><strong>Frequent One-Time Items:</strong> Masking underlying problems</li>
+                  <li><strong>Channel Stuffing:</strong> Accelerating sales to boost current period</li>
+                  <li><strong>Rising Receivables:</strong> Customers not paying or fake sales</li>
+                  <li><strong>Declining Margins:</strong> Losing competitive advantage</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div className="growth-analysis">
+            <h4> Growth Analysis Framework</h4>
+            
+            <div className="growth-framework">
+              <div className="framework-step">
+                <h5>1. Historical Growth Analysis</h5>
+                <ul>
+                  <li>Analyze 5-10 years of earnings and revenue growth</li>
+                  <li>Look for consistency and acceleration/deceleration trends</li>
+                  <li>Compare growth rates to industry and market averages</li>
+                  <li>Identify cyclical vs. secular growth patterns</li>
+                </ul>
+              </div>
+              
+              <div className="framework-step">
+                <h5>2. Growth Drivers Identification</h5>
+                <ul>
+                  <li><strong>Market Expansion:</strong> Growing total addressable market</li>
+                  <li><strong>Market Share Gains:</strong> Taking share from competitors</li>
+                  <li><strong>New Products/Services:</strong> Innovation driving growth</li>
+                  <li><strong>Geographic Expansion:</strong> Entering new markets</li>
+                  <li><strong>Operational Efficiency:</strong> Margin expansion</li>
+                </ul>
+              </div>
+              
+              <div className="framework-step">
+                <h5>3. Sustainability Assessment</h5>
+                <ul>
+                  <li>Competitive moat strength and durability</li>
+                  <li>Management execution track record</li>
+                  <li>Industry dynamics and future outlook</li>
+                  <li>Capital requirements for continued growth</li>
+                  <li>Regulatory and technological risks</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div className="growth-types">
+            <h4> Types of Growth Companies</h4>
+            
+            <div className="growth-types-grid">
+              <div className="growth-type-card">
+                <h5> High-Growth Companies</h5>
+                <p><strong>Characteristics:</strong> 20%+ earnings growth, expanding markets</p>
+                <p><strong>Examples:</strong> Technology, biotech, disruptive businesses</p>
+                <p><strong>Risk/Reward:</strong> High potential returns, high volatility</p>
+                <p><strong>Valuation:</strong> High P/E ratios, growth premium</p>
+              </div>
+              
+              <div className="growth-type-card">
+                <h5> Steady Growth Companies</h5>
+                <p><strong>Characteristics:</strong> 10-20% consistent growth, proven business models</p>
+                <p><strong>Examples:</strong> Consumer staples, healthcare, utilities</p>
+                <p><strong>Risk/Reward:</strong> Moderate returns, lower volatility</p>
+                <p><strong>Valuation:</strong> Reasonable P/E ratios, stability premium</p>
+              </div>
+              
+              <div className="growth-type-card">
+                <h5> Cyclical Growth Companies</h5>
+                <p><strong>Characteristics:</strong> Growth tied to economic cycles</p>
+                <p><strong>Examples:</strong> Industrials, materials, financials</p>
+                <p><strong>Risk/Reward:</strong> Variable returns, timing dependent</p>
+                <p><strong>Valuation:</strong> P/E varies with cycle, value opportunities</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="earnings-tips">
+            <h4> Earnings Analysis Best Practices</h4>
+            <ul>
+              <li><strong>Focus on Trends:</strong> Look at 3-5 year patterns, not just one quarter</li>
+              <li><strong>Quality Over Quantity:</strong> Sustainable growth beats unsustainable spikes</li>
+              <li><strong>Compare Apples to Apples:</strong> Use industry-specific metrics</li>
+              <li><strong>Read the Details:</strong> Dive into earnings call transcripts and 10-K filings</li>
+              <li><strong>Consider Valuation:</strong> Great growth at a terrible price is a bad investment</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    
+    valuation_methods: {
+      title: " Valuation Methods",
+      content: (
+        <div className="tutorial-content">
+          <h3>Stock Valuation Techniques</h3>
+          <p>Valuation is the process of determining what a company is worth. Different methods provide different perspectives on a stock's fair value.</p>
+          
+          <div className="valuation-method">
+            <h4>💳 Discounted Cash Flow (DCF) Analysis</h4>
+            <p>The gold standard of valuation - estimates the present value of future cash flows.</p>
+            
+            <div className="dcf-steps">
+              <div className="dcf-step">
+                <h5>Step 1: Project Free Cash Flows</h5>
+                <div className="formula">Free Cash Flow = Operating Cash Flow - Capital Expenditures</div>
+                <p>Project FCF for 5-10 years based on revenue growth, margins, and capex needs</p>
+              </div>
+              
+              <div className="dcf-step">
+                <h5>Step 2: Estimate Terminal Value</h5>
+                <div className="formula">Terminal Value = FCF(final year) × (1 + growth) / (discount rate - growth)</div>
+                <p>Value of cash flows beyond the projection period (typically 60-80% of total value)</p>
+              </div>
+              
+              <div className="dcf-step">
+                <h5>Step 3: Discount to Present Value</h5>
+                <div className="formula">PV = Future Cash Flow / (1 + discount rate)^years</div>
+                <p>Use Weighted Average Cost of Capital (WACC) as discount rate</p>
+              </div>
+              
+              <div className="dcf-step">
+                <h5>Step 4: Calculate Per-Share Value</h5>
+                <div className="formula">Share Price = (Sum of PV + Terminal PV - Net Debt) / Shares Outstanding</div>
+                <p>Compare to current market price to determine over/undervaluation</p>
+              </div>
+            </div>
+            
+            <div className="dcf-pros-cons">
+              <div className="pros">
+                <h6> DCF Advantages</h6>
+                <ul>
+                  <li>Based on fundamental value creation</li>
+                  <li>Incorporates company-specific factors</li>
+                  <li>Helps understand value drivers</li>
+                  <li>Not influenced by market sentiment</li>
+                </ul>
+              </div>
+              <div className="cons">
+                <h6> DCF Limitations</h6>
+                <ul>
+                  <li>Highly sensitive to assumptions</li>
+                  <li>Difficult to project far into future</li>
+                  <li>Terminal value dominates result</li>
+                  <li>May not reflect market dynamics</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div className="valuation-method">
+            <h4> Comparable Company Analysis</h4>
+            <p>Values a company based on multiples of similar public companies.</p>
+            
+            <div className="comps-process">
+              <div className="comp-step">
+                <h5>1. Select Peer Companies</h5>
+                <ul>
+                  <li>Same industry and business model</li>
+                  <li>Similar size and growth profile</li>
+                  <li>Comparable geographic exposure</li>
+                  <li>Similar capital structure</li>
+                </ul>
+              </div>
+              
+              <div className="comp-step">
+                <h5>2. Calculate Key Multiples</h5>
+                <div className="multiples-grid">
+                  <div className="multiple">
+                    <strong>P/E Ratio:</strong> Price / Earnings
+                  </div>
+                  <div className="multiple">
+                    <strong>EV/EBITDA:</strong> Enterprise Value / EBITDA
+                  </div>
+                  <div className="multiple">
+                    <strong>P/B Ratio:</strong> Price / Book Value
+                  </div>
+                  <div className="multiple">
+                    <strong>P/S Ratio:</strong> Price / Sales
+                  </div>
+                </div>
+              </div>
+              
+              <div className="comp-step">
+                <h5>3. Apply Multiples</h5>
+                <p>Multiply target company's metrics by peer group averages or ranges</p>
+                <div className="formula">Estimated Value = Target Company Metric × Peer Multiple</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="valuation-method">
+            <h4> Precedent Transaction Analysis</h4>
+            <p>Values company based on what acquirers have paid for similar companies.</p>
+            
+            <div className="transaction-factors">
+              <div className="factor-card">
+                <h5>Transaction Premiums</h5>
+                <p>Acquisitions typically pay 20-40% premium to market price</p>
+                <p><strong>Reasons:</strong> Control premium, synergies, strategic value</p>
+              </div>
+              
+              <div className="factor-card">
+                <h5>Deal Characteristics</h5>
+                <p>Consider deal size, timing, market conditions, and strategic rationale</p>
+                <p><strong>Relevance:</strong> More recent and similar deals are more relevant</p>
+              </div>
+              
+              <div className="factor-card">
+                <h5>Market Context</h5>
+                <p>M&A activity varies with market cycles and sector trends</p>
+                <p><strong>Adjustment:</strong> Consider current market environment</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="valuation-synthesis">
+            <h4> Valuation Synthesis</h4>
+            
+            <div className="synthesis-approach">
+              <h5>Football Field Valuation</h5>
+              <p>Combine multiple valuation methods to create a range of fair values</p>
+              
+              <div className="valuation-range">
+                <div className="method-range">
+                  <span className="method">DCF Analysis:</span>
+                  <span className="range">$45 - $55</span>
+                </div>
+                <div className="method-range">
+                  <span className="method">Comparable Companies:</span>
+                  <span className="range">$48 - $52</span>
+                </div>
+                <div className="method-range">
+                  <span className="method">Precedent Transactions:</span>
+                  <span className="range">$50 - $60</span>
+                </div>
+                <div className="consensus-range">
+                  <span className="method"><strong>Consensus Range:</strong></span>
+                  <span className="range"><strong>$48 - $55</strong></span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="valuation-decision">
+              <h5>Investment Decision Framework</h5>
+              <div className="decision-grid">
+                <div className="decision-card buy">
+                  <h6>BUY (Current Price &lt; Low End)</h6>
+                  <p>Significant upside potential, attractive risk/reward</p>
+                </div>
+                <div className="decision-card hold">
+                  <h6> HOLD (Within Range)</h6>
+                  <p>Fair valuation, limited upside, monitor developments</p>
+                </div>
+                <div className="decision-card sell">
+                  <h6> SELL (Current Price &gt; High End)</h6>
+                  <p>Overvalued, limited upside, consider taking profits</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="valuation-tips">
+            <h4> Valuation Best Practices</h4>
+            <ul>
+              <li><strong>Use Multiple Methods:</strong> No single method is perfect</li>
+              <li><strong>Stress Test Assumptions:</strong> See how sensitive valuations are to key inputs</li>
+              <li><strong>Consider Quality:</strong> High-quality companies deserve premium valuations</li>
+              <li><strong>Update Regularly:</strong> Valuations change as new information emerges</li>
+              <li><strong>Margin of Safety:</strong> Buy below fair value to account for uncertainty</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    
+    fibonacci: {
+      title: " Fibonacci Retracements",
+      content: (
+        <div className="tutorial-content">
+          <h3>Fibonacci in Trading</h3>
+          <p>Fibonacci retracements are based on the mathematical relationships between numbers in the Fibonacci sequence, used to identify potential support and resistance levels.</p>
+          
+          <div className="fib-sequence">
+            <h4> The Fibonacci Sequence</h4>
+            <div className="sequence-box">
+              <p>0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...</p>
+              <p><strong>Rule:</strong> Each number is the sum of the two preceding numbers</p>
+            </div>
+            
+            <div className="fib-ratios">
+              <h5> Key Ratios</h5>
+              <div className="ratio-grid">
+                <div className="ratio-card">
+                  <h6>23.6%</h6>
+                  <p>Shallow retracement</p>
+                </div>
+                <div className="ratio-card">
+                  <h6>38.2%</h6>
+                  <p>Common retracement</p>
+                </div>
+                <div className="ratio-card golden">
+                  <h6>61.8%</h6>
+                  <p>Golden ratio</p>
+                </div>
+                <div className="ratio-card">
+                  <h6>78.6%</h6>
+                  <p>Deep retracement</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="fib-application">
+            <h4> How to Apply Fibonacci</h4>
+            
+            <div className="application-steps">
+              <div className="fib-step">
+                <h5>Step 1: Identify the Trend</h5>
+                <p>Determine if you're in an uptrend or downtrend</p>
+              </div>
+              
+              <div className="fib-step">
+                <h5>Step 2: Find Swing Points</h5>
+                <p><strong>Uptrend:</strong> Draw from swing low to swing high</p>
+                <p><strong>Downtrend:</strong> Draw from swing high to swing low</p>
+              </div>
+              
+              <div className="fib-step">
+                <h5>Step 3: Watch for Confluence</h5>
+                <p>Look for multiple indicators confirming Fibonacci levels</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="fib-strategies">
+            <h4> Trading Strategies</h4>
+            
+            <div className="fib-strategy">
+              <h5> Retracement Trading</h5>
+              <div className="retracement-guide">
+                <div className="ret-level">
+                  <h6> 23.6% Level</h6>
+                  <p><strong>Meaning:</strong> Strong trend, shallow pullback</p>
+                  <p><strong>Action:</strong> Early entry point</p>
+                </div>
+                
+                <div className="ret-level">
+                  <h6> 38.2% Level</h6>
+                  <p><strong>Meaning:</strong> Common retracement level</p>
+                  <p><strong>Action:</strong> Good entry with confirmation</p>
+                </div>
+                
+                <div className="ret-level">
+                  <h6> 61.8% Level</h6>
+                  <p><strong>Meaning:</strong> Golden ratio, strong support/resistance</p>
+                  <p><strong>Action:</strong> High probability entry</p>
+                </div>
+                
+                <div className="ret-level">
+                  <h6> 78.6% Level</h6>
+                  <p><strong>Meaning:</strong> Deep retracement, trend weakening</p>
+                  <p><strong>Action:</strong> Last chance entry</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="fib-strategy">
+              <h5> Extension Trading</h5>
+              <div className="extension-levels">
+                <div className="ext-level">
+                  <h6>127.2%</h6>
+                  <p>First extension target</p>
+                </div>
+                <div className="ext-level">
+                  <h6>161.8%</h6>
+                  <p>Golden extension</p>
+                </div>
+                <div className="ext-level">
+                  <h6>261.8%</h6>
+                  <p>Strong extension target</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="fib-confluence">
+            <h4> Confluence Factors</h4>
+            <div className="confluence-grid">
+              <div className="confluence-card">
+                <h5> Multiple Timeframes</h5>
+                <p>Fibonacci levels aligning across different timeframes</p>
+              </div>
+              
+              <div className="confluence-card">
+                <h5> Moving Averages</h5>
+                <p>Fibonacci levels coinciding with key MAs</p>
+              </div>
+              
+              <div className="confluence-card">
+                <h5> Support/Resistance</h5>
+                <p>Fibonacci levels at historical S/R zones</p>
+              </div>
+              
+              <div className="confluence-card">
+                <h5> Volume Profile</h5>
+                <p>High volume nodes at Fibonacci levels</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="fib-tips">
+            <h4> Fibonacci Tips</h4>
+            <ul>
+              <li>More touches = stronger level</li>
+              <li>Use with other indicators for confirmation</li>
+              <li>Watch for price rejection at key levels</li>
+              <li>Consider market structure and context</li>
+              <li>Practice identifying swing points</li>
+            </ul>
+          </div>
+        </div>
+      )
+    }
+  };
+
+  // Generate sample data
+  const generateSampleData = () => {
+    const periods = 100;
+    const data = [];
+    let price = 150 + Math.random() * 100;
+    
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - periods);
+    
+    for (let i = 0; i < periods; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      
+      const volatility = 0.02;
+      const trend = 0.001;
+      const randomChange = (Math.random() - 0.5) * volatility;
+      
+      price = price * (1 + trend + randomChange);
+      
+      const open = price * (1 + (Math.random() - 0.5) * 0.01);
+      const high = Math.max(open, price) * (1 + Math.random() * 0.02);
+      const low = Math.min(open, price) * (1 - Math.random() * 0.02);
+      const close = price;
+      const volume = Math.floor(Math.random() * 10000000 + 1000000);
+      
+      data.push({
+        date: date.toISOString().split('T')[0],
+        open: parseFloat(open.toFixed(2)),
+        high: parseFloat(high.toFixed(2)),
+        low: parseFloat(low.toFixed(2)),
+        close: parseFloat(close.toFixed(2)),
+        volume: volume
+      });
+    }
+    
+    return data;
+  };
+
+  // Initialize with sample data
+  useEffect(() => {
+    const data = generateSampleData();
+    setStockData(data);
+  }, []);
+
+  return (
+    <div className="technical-analysis-tutorial">
+      <div className="page-header compact">
+        <h1> Master Investment Analysis</h1>
+        <p>Complete guide to technical and fundamental analysis with live examples and practical strategies</p>
+      </div>
+
+      <div className="tutorial-navigation">
+        {Object.keys(sections).map((sectionKey) => (
+          <button
+            key={sectionKey}
+            className={`nav-button ${activeSection === sectionKey ? 'active' : ''}`}
+            onClick={() => setActiveSection(sectionKey)}
+          >
+            {sections[sectionKey].title}
+          </button>
+        ))}
+      </div>
+
+      <div className="tutorial-content-container">
+        <div className="content-section">
+          <h2>{sections[activeSection].title}</h2>
+          {sections[activeSection].content}
+        </div>
+
+        {stockData && activeSection !== 'introduction' && (
+          <div className="live-demo">
+            <h3> Live Demo</h3>
+            <Plot
+              data={[
+                {
+                  x: stockData.map(d => d.date),
+                  open: stockData.map(d => d.open),
+                  high: stockData.map(d => d.high),
+                  low: stockData.map(d => d.low),
+                  close: stockData.map(d => d.close),
+                  type: 'candlestick',
+                  name: 'Sample Stock',
+                  increasing: { line: { color: '#00CC00' } },
+                  decreasing: { line: { color: '#CC0000' } }
+                }
+              ]}
+              layout={{
+                title: 'Sample Stock Data - Apply What You Learn!',
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Price ($)' },
+                height: 400
+              }}
+              style={{ width: '100%' }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="tutorial-footer">
+        <div className="next-steps">
+          <h3> Next Steps</h3>
+          <div className="steps-grid">
+            <div className="step-card">
+              <h4> Practice</h4>
+              <p>Apply these concepts to real market data</p>
+            </div>
+            <div className="step-card">
+              <h4> Combine Indicators</h4>
+              <p>Use multiple indicators for confirmation</p>
+            </div>
+            <div className="step-card">
+              <h4> Risk Management</h4>
+              <p>Always use proper position sizing and stops</p>
+            </div>
+            <div className="step-card">
+              <h4> Keep Learning</h4>
+              <p>Markets evolve, so should your knowledge</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TechnicalAnalysisTutorial;

@@ -1,7 +1,21 @@
-import React from 'react'
-import CameraView from './CameraView.jsx'
-
+import React, { useEffect } from 'react'
+import TechnicalAnalysisApp from './TechnicalAnalysisApp.jsx'
+import { initGA } from './analytics.js'
+import { initAdSense, AutoAds } from './adsense.js'
 
 export default function App() {
-return <CameraView />
+  useEffect(() => {
+    // Initialize Google Analytics
+    initGA();
+    
+    // Initialize Google AdSense
+    initAdSense();
+  }, []);
+
+  return (
+    <>
+      <AutoAds />
+      <TechnicalAnalysisApp />
+    </>
+  )
 }

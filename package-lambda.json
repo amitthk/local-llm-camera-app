@@ -1,0 +1,40 @@
+{
+  "name": "stridecal-lambda-app",
+  "version": "1.0.0",
+  "description": "Stridecal Investment Analysis - AWS Lambda Deployment",
+  "main": "lambda/app.js",
+  "scripts": {
+    "build": "npm run build:client && npm run prepare:lambda",
+    "build:client": "cd client && npm run build",
+    "prepare:lambda": "cp -r dist/* lambda/ || echo 'No dist directory found'",
+    "deploy": "npm run build && serverless deploy",
+    "deploy:dev": "npm run build && serverless deploy --stage dev",
+    "deploy:prod": "npm run build && serverless deploy --stage prod",
+    "remove": "serverless remove",
+    "logs": "serverless logs -f app -t",
+    "offline": "serverless offline start",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "aws-lambda": "^1.0.7"
+  },
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.0",
+    "serverless-plugin-warmup": "^8.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "serverless",
+    "react",
+    "investment-analysis",
+    "technical-analysis",
+    "fundamental-analysis"
+  ],
+  "author": "Stridecal",
+  "license": "MIT"
+}
